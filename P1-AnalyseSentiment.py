@@ -4,9 +4,12 @@ import sklearn
 from sklearn.datasets import load_files
 from nltk.tokenize import word_tokenize
 from nltk.corpus import sentiwordnet as swn
+
+
 #nltk.download('stopwords')
 import pickle
 from nltk.corpus import stopwords as sw
+from sklearn.metrics import average_precision_score
 import string
 
 from nltk.corpus import stopwords
@@ -53,9 +56,12 @@ def lemmatize_texte( token, tag, normalize):
         try:
             res_negpos = swn.senti_synset(token + "." + tag + ".01")
             if normalize == 1:
-                return lemmatizer.lemmatize(ps.stem(token), tag), res_negpos
+                return lemmatizer.lemmatize(token, tag), res_negpos
             else:
-                return token, res_negpos
+                if normalize == 2:
+                    return ps.stem(token), res_negpos
+                else:
+                    return token, res_negpos
         except:
             return None
 
@@ -115,17 +121,36 @@ X = vectorizer.fit_transform(New_X).toarray()
 
 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
 clf = MultinomialNB().fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 print(sklearn.metrics.accuracy_score(y_test, y_pred))
+
+
+
+
+average_precision = average_precision_score(y_test, y_pred)
+
+print('Average precision-recall score: {0:0.2f}'.format(
+      average_precision))
+
+
 print("-------------------------------------------------")
 print("Logistic Reg")
 logreg = LogisticRegression().fit(X_train, y_train)
-y_pred = clf.predict(X_test)
+y_pred = logreg.predict(X_test)
 print(sklearn.metrics.accuracy_score(y_test, y_pred))
+average_precision = average_precision_score(y_test, y_pred)
 
+print('Average precision-recall score: {0:0.2f}'.format(
+      average_precision))
 print("-------------------------------------------------")
+
+
+
+
+
+
 reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
 reviews_new = ['This movie was bad', 'Absolute joy ride',
             'Steven Seagal was terrible', 'Steven Seagal shined through.',
@@ -136,17 +161,17 @@ reviews_new = ['This movie was bad', 'Absolute joy ride',
 
 
 
-reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new))
+reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new,m_normalize))
 
 pred = clf.predict(reviews_new_counts)
-for review, category in zip(Transform_documents(reviews_new), pred):
+for review, category in zip(Transform_documents(reviews_new,m_normalize), pred):
     print('%r => %s' % (review, book_train.target_names[category]))
 print (pred)
 print(sklearn.metrics.accuracy_score(reviews_tt, pred))
 
 
 pred = logreg.predict(reviews_new_counts)
-for review, category in zip(Transform_documents(reviews_new), pred):
+for review, category in zip(Transform_documents(reviews_new,m_normalize), pred):
     print('%r => %s' % (review, book_train.target_names[category]))
 print (pred)
 print(sklearn.metrics.accuracy_score(reviews_tt, pred))

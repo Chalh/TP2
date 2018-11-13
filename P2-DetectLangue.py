@@ -14,16 +14,7 @@ from nltk.classify import MaxentClassifier
 import re
 import os
 
-
-
-
-
-
-#Lecture du contenu du fichier d'entrainement
-file = open('identification_langue/corpus_entrainement/english-training.txt', 'rb')
-contenu_english_train = file.read()
-file.close()
-
+import sys
 ########################################################################################################################
 #                                                                                                                      #
 #               Preparation de la structure de calcul de probabilite avec NLTK
@@ -31,7 +22,7 @@ file.close()
 ########################################################################################################################
 
 
-def Attributs_phrase(phrase,nbgrm):
+def Attributs_phrases(phrase,nbgrm):
 
     attribut = {}
     phrase = phrase.lower()
@@ -44,31 +35,45 @@ def Attributs_phrase(phrase,nbgrm):
     return attribut
 
 
-def Reconnaitre_langue(fichier, classificateur):
+def Preparer_Attribut_List(chemin_fichier, nb_ligne, langue, ngramme):
 
-    count_langue = {"eng":0,"esp":0,"fr":0, "port":0}
+    file = open(chemin_fichier, 'rb')
+    txt_lect = [ligne for ligne in file]
+    file.close()
+
+    Attributs_list = []
+    for ln in range(0, len(txt_lect), nb_ligne):
+        if nb_ligne > 1:
+            x=txt_lect[ln:ln + (nb_ligne - 1)]
+            x =' '.join(map(str, x))
+        else:
+            x = txt_lect[ln]
+        Attributs_list.append((Attributs_phrases(x.__str__(), ngramme), langue))
+
+    return Attributs_list
+
+
+
+def Reconnaitre_langue(fichier, classificateur,nb_ligne, ngramme):
+
+    count_langue = {"en":0,"es":0,"fr":0, "pt":0}
     f = open(fichier, 'rb')
-    testset=[]
-    lignes = f.readlines()
-    for ligne in lignes:
-#        if ligne is not None:
-#            if "test20.txt" in fichier:
-#                f.readlines()
-#                m1 = p1.split(ligne)
-#                print "-------------------------"
-#                if m1 is not None:
-#                    print m1.string
-#                print "-------------------------"
-#            else:
-                if ligne is not "\n":
-                    testset.append(Attributs_phrase(ligne, 3))
 
-       # testset = [Attributs_phrase(ligne, 3) for ligne in f]
+    testset=[]
+    txt_lect = [ligne for ligne in f]
+    f.close()
+    for ln in range(0, len(txt_lect), nb_ligne):
+        if NB_LIGNES > 1:
+            x = txt_lect[ln:ln + (nb_ligne - 1)]
+            x = ' '.join(map(str, x))
+        else:
+            x = txt_lect[ln]
+        testset.append(Attributs_phrases(x, ngramme))
 
     for atrb in testset:
         resultat = classificateur.classify(atrb)
         count_langue[resultat] +=1
-        langue_texte = "eng"
+        langue_texte = "en"
         nb_phrase_langue =0
     for x in count_langue:
         if count_langue[x] > nb_phrase_langue:
@@ -77,38 +82,46 @@ def Reconnaitre_langue(fichier, classificateur):
     print (count_langue)
     return langue_texte
 
-file = open('identification_langue/corpus_entrainement/english-training.txt', 'rb')
 
-train_english = [(Attributs_phrase (ligne,3),"eng") for ligne in file]
-file.close()
-
-file = open('identification_langue/corpus_entrainement/espanol-training.txt', 'rb')
-train_espagnol = [(Attributs_phrase (ligne,3),"esp") for ligne in file]
-file.close()
-
-file = open('identification_langue/corpus_entrainement/french-training.txt', 'rb')
-train_french = [(Attributs_phrase (ligne,3),"fr") for ligne in file]
-file.close()
-
-file = open('identification_langue/corpus_entrainement/portuguese-training.txt', 'rb')
-train_portuguese = [(Attributs_phrase (ligne,3),"port") for ligne in file]
-file.close()
+NB_LIGNES=3
+N_GRAMMES =4
+Chemin_fich_en = 'identification_langue/corpus_entrainement/english-training.txt'
+Chemin_fich_es = 'identification_langue/corpus_entrainement/espanol-training.txt'
+Chemin_fich_fr = 'identification_langue/corpus_entrainement/french-training.txt'
+Chemin_fich_pt = 'identification_langue/corpus_entrainement/portuguese-training.txt'
 
 
-trainset = train_english + train_espagnol+train_french+train_portuguese
-
-
+trainset = Preparer_Attribut_List(Chemin_fich_en,NB_LIGNES,"en",N_GRAMMES) \
+           +  Preparer_Attribut_List(Chemin_fich_es,NB_LIGNES,"es",N_GRAMMES)\
+           +  Preparer_Attribut_List(Chemin_fich_fr,NB_LIGNES,"fr",N_GRAMMES)\
+           + Preparer_Attribut_List(Chemin_fich_pt,NB_LIGNES,"pt",N_GRAMMES)
 
 
 classifier = NaiveBayesClassifier.train(trainset)
 
-rep_test = "identification_langue/corpus_test1/"
-for fabc in os.listdir(rep_test):
-    print (str(fabc) + "::" + Reconnaitre_langue(rep_test+fabc, classifier))
+Chemin_fich_test = "identification_langue/corpus_test1/"
+
+
+p1 = re.compile(r'.*(fr|en|es|pt)\.txt')
+
+testset=[]
+accuracy = 0
+for fabc in os.listdir(Chemin_fich_test):
+    m1 = p1.search(fabc)
+    if m1 is not None:
+
+        testset += Preparer_Attribut_List(Chemin_fich_test+fabc, NB_LIGNES, m1.group(1), N_GRAMMES)
+
+        print(fabc + "::" + Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES))
+        if Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES) == m1.group(1):
+
+            accuracy +=1
+
+print (nltk.classify.util.accuracy(classifier, testset))
+
+print (float(accuracy))
 
 classifier.show_most_informative_features()
 
 
-
-freq_dist_trigrame = False
 
