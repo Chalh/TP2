@@ -147,10 +147,6 @@ print('Average precision-recall score: {0:0.2f}'.format(
 print("-------------------------------------------------")
 
 
-
-
-
-
 reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
 reviews_new = ['This movie was bad', 'Absolute joy ride',
             'Steven Seagal was terrible', 'Steven Seagal shined through.',
