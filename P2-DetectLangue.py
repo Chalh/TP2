@@ -22,15 +22,14 @@ import sys
 ########################################################################################################################
 
 
-def Attributs_phrases(phrase,nbgrm):
+def Attributs_phrases(phrase,freq_dist,nbgrm):
 
     attribut = {}
     phrase = phrase.lower()
     ngram_train = list(nltk.ngrams(phrase,nbgrm))
-    freq_dist_ngram = FreqDist(ngram_train)
 
     for t in ngram_train:
-        attribut["count({})".format(t)] = freq_dist_ngram[t]
+        attribut["count({})".format(t)] = freq_dist[t]
 
     return attribut
 
@@ -39,6 +38,8 @@ def Preparer_Attribut_List(chemin_fichier, nb_ligne, langue, ngramme):
 
     file = open(chemin_fichier, 'rb')
     txt_lect = [ligne for ligne in file]
+    txt_ngram_train = list(nltk.ngrams(txt_lect,ngramme))
+    txt_freq_dist_ngram = FreqDist(txt_ngram_train)
     file.close()
 
     Attributs_list = []
@@ -48,7 +49,7 @@ def Preparer_Attribut_List(chemin_fichier, nb_ligne, langue, ngramme):
             x =' '.join(map(str, x))
         else:
             x = txt_lect[ln]
-        Attributs_list.append((Attributs_phrases(x.__str__(), ngramme), langue))
+        Attributs_list.append((Attributs_phrases(x.__str__(),txt_freq_dist_ngram, ngramme), langue))
 
     return Attributs_list
 
@@ -61,6 +62,8 @@ def Reconnaitre_langue(fichier, classificateur,nb_ligne, ngramme):
 
     testset=[]
     txt_lect = [ligne for ligne in f]
+    txt_ngram_train = list(nltk.ngrams(txt_lect, ngramme))
+    txt_freq_dist_ngram = FreqDist(txt_ngram_train)
     f.close()
     for ln in range(0, len(txt_lect), nb_ligne):
         if NB_LIGNES > 1:
@@ -68,7 +71,7 @@ def Reconnaitre_langue(fichier, classificateur,nb_ligne, ngramme):
             x = ' '.join(map(str, x))
         else:
             x = txt_lect[ln]
-        testset.append(Attributs_phrases(x, ngramme))
+        testset.append(Attributs_phrases(x, txt_freq_dist_ngram,ngramme))
 
     for atrb in testset:
         resultat = classificateur.classify(atrb)
@@ -79,11 +82,10 @@ def Reconnaitre_langue(fichier, classificateur,nb_ligne, ngramme):
         if count_langue[x] > nb_phrase_langue:
             langue_texte = x
             nb_phrase_langue = count_langue[x]
-    print (count_langue)
     return langue_texte
 
 
-NB_LIGNES=3
+NB_LIGNES=5
 N_GRAMMES =4
 Chemin_fich_en = 'identification_langue/corpus_entrainement/english-training.txt'
 Chemin_fich_es = 'identification_langue/corpus_entrainement/espanol-training.txt'
@@ -112,7 +114,7 @@ for fabc in os.listdir(Chemin_fich_test):
 
         testset += Preparer_Attribut_List(Chemin_fich_test+fabc, NB_LIGNES, m1.group(1), N_GRAMMES)
 
-        print(fabc + "::" + Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES))
+        #print(fabc + "::" + Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES))
         if Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES) == m1.group(1):
 
             accuracy +=1
