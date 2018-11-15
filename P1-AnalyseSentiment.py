@@ -24,7 +24,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from nltk.stem import PorterStemmer
 from sklearn.linear_model import LogisticRegression
-
+import sys
 
 ps = PorterStemmer()
 bookdir = r'Book'
@@ -40,6 +40,10 @@ book_train = load_files(bookdir, shuffle=True)
 stopwd  = set(sw.words('english'))
 
 lemmatizer = WordNetLemmatizer()
+
+f = open('analyse avec-stemming.txt','w')
+stdout_old = sys.stdout
+sys.stdout = f
 
 def lemmatize_texte( token, tag, normalize):
     tag = {
@@ -113,9 +117,10 @@ def Transform_documents(texte_doc_list,normalize):
     return documents
 
 X, y = book_train.data, book_train.target
-m_normalize = 2
+m_normalize = 3
 New_X = Transform_documents(X,m_normalize)
-
+print("NAIVE BAYES;-----;LOGISTIC REGRESSION;-----")
+print("accuracy;precision;accuracy;precision")
 for mindf in range(1,50):
     vectorizer = CountVectorizer(min_df=mindf, stop_words=stopwd)
     X = vectorizer.fit_transform(New_X).toarray()
@@ -123,29 +128,15 @@ for mindf in range(1,50):
     clf = MultinomialNB().fit(X_train, y_train)
     y_pred = clf.predict(X_test)
 
-    print("------------------- " + mindf.__str__()+" ------------------------------")
-    print("Naive Bayes")
-    print(sklearn.metrics.accuracy_score(y_test, y_pred))
+    average_precision_nb = average_precision_score(y_test, y_pred)
+    accuracy_score_nb=sklearn.metrics.accuracy_score(y_test, y_pred)
 
 
-
-
-    average_precision = average_precision_score(y_test, y_pred)
-
-    print('Average precision-recall score: {0:0.2f}'.format(
-          average_precision))
-
-
-
-    print("Logistic Reg")
     logreg = LogisticRegression().fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
-    print(sklearn.metrics.accuracy_score(y_test, y_pred))
-    average_precision = average_precision_score(y_test, y_pred)
-
-    print('Average precision-recall score: {0:0.2f}'.format(
-          average_precision))
-    print("-------------------------------------------------")
+    average_precision_lr = average_precision_score(y_test, y_pred)
+    accuracy_score_lr = sklearn.metrics.accuracy_score(y_test, y_pred)
+    print(accuracy_score_nb.__str__()+";"+average_precision_nb.__str__()+";"+accuracy_score_lr.__str__()+";"+average_precision_lr.__str__())
 
 
 #reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
@@ -172,3 +163,6 @@ for mindf in range(1,50):
 #    print('%r => %s' % (review, book_train.target_names[category]))
 #print (pred)
 #print(sklearn.metrics.accuracy_score(reviews_tt, pred))
+
+sys.stdout = stdout_old
+print ("OK")

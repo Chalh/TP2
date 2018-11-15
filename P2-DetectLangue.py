@@ -95,18 +95,19 @@ Chemin_fich_es = 'identification_langue/corpus_entrainement/espanol-training.txt
 Chemin_fich_fr = 'identification_langue/corpus_entrainement/french-training.txt'
 Chemin_fich_pt = 'identification_langue/corpus_entrainement/portuguese-training.txt'
 
-f = open('output.txt','w')
+f = open('output_bynight.txt','w')
 stdout_old = sys.stdout
-#sys.stdout = f
+sys.stdout = f
 
 
 nb_ligne_test=[1,2,3,5,10]
-
+print("NAIVE BAYES;-----;LOGISTIC REGRESSION;-----")
+print("accuracy;-----;accuracy;-----")
 for n in range(1,4):
     N_GRAMMES = n
     for m in nb_ligne_test:
         NB_LIGNES = m
-        print("-----------------------------"+ n.__str__() + " :: "+m.__str__()+"-----------------------------------------")
+
         trainset = Preparer_Attribut_List(Chemin_fich_en,NB_LIGNES,"en",N_GRAMMES) \
                    +  Preparer_Attribut_List(Chemin_fich_es,NB_LIGNES,"es",N_GRAMMES)\
                    +  Preparer_Attribut_List(Chemin_fich_fr,NB_LIGNES,"fr",N_GRAMMES)\
@@ -124,7 +125,7 @@ for n in range(1,4):
 
         p1 = re.compile(r'.*(fr|en|es|pt)\.txt')
 
-        print("------------------------------------NAIVE BAYES--------------------------------------")
+
 
         testset=[]
         accuracy = 0
