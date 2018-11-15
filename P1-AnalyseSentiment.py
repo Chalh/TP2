@@ -113,7 +113,7 @@ def Transform_documents(texte_doc_list,normalize):
     return documents
 
 X, y = book_train.data, book_train.target
-m_normalize = 1
+m_normalize = 1#
 vectorizer = CountVectorizer(min_df=4, stop_words=stopwd)
 New_X = Transform_documents(X,m_normalize)
 
@@ -147,27 +147,27 @@ print('Average precision-recall score: {0:0.2f}'.format(
 print("-------------------------------------------------")
 
 
-reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
-reviews_new = ['This book was bad', 'Absolute joy ride',
-            'Jean  was terrible', 'Steven Seagal shined through.',
-              'This was certainly a movie', 'Two thumbs up', 'I fell asleep halfway through',
-              "We can't wait for the sequel!!", '!', '?', 'I cannot recommend this highly enough',
-              'instant classic.', 'Steven Seagal was amazing. His performance was Oscar-worthy.']
-
-
-
-
-reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new,m_normalize))
-
-pred = clf.predict(reviews_new_counts)
-for review, category in zip(Transform_documents(reviews_new,m_normalize), pred):
-    print('%r => %s' % (review, book_train.target_names[category]))
-print (pred)
-print(sklearn.metrics.accuracy_score(reviews_tt, pred))
-
-
-pred = logreg.predict(reviews_new_counts)
-for review, category in zip(Transform_documents(reviews_new,m_normalize), pred):
-    print('%r => %s' % (review, book_train.target_names[category]))
-print (pred)
-print(sklearn.metrics.accuracy_score(reviews_tt, pred))
+#reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
+#reviews_new = ['This book was bad', 'Absolute joy ride',
+#            'Jean  was terrible', 'Steven Seagal shined through.',
+#              'This was certainly a movie', 'Two thumbs up', 'I fell asleep halfway through',
+#              "We can't wait for the sequel!!", '!', '?', 'I cannot recommend this highly enough',
+#              'instant classic.', 'Steven Seagal was amazing. His performance was Oscar-worthy.']
+#
+#
+#
+#
+#reviews_new_counts = vectorizer.transform(Transform_documents(reviews_new,m_normalize))
+#
+#pred = clf.predict(reviews_new_counts)
+#for review, category in zip(Transform_documents(reviews_new,m_normalize), pred):
+#    print('%r => %s' % (review, book_train.target_names[category]))
+#print (pred)
+#print(sklearn.metrics.accuracy_score(reviews_tt, pred))
+#
+#
+#pred = logreg.predict(reviews_new_counts)
+#for review, category in zip(Transform_documents(reviews_new,m_normalize), pred):
+#    print('%r => %s' % (review, book_train.target_names[category]))
+#print (pred)
+#print(sklearn.metrics.accuracy_score(reviews_tt, pred))
