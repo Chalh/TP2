@@ -148,8 +148,8 @@ print("-------------------------------------------------")
 
 
 reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
-reviews_new = ['This movie was bad', 'Absolute joy ride',
-            'Steven Seagal was terrible', 'Steven Seagal shined through.',
+reviews_new = ['This book was bad', 'Absolute joy ride',
+            'Jean  was terrible', 'Steven Seagal shined through.',
               'This was certainly a movie', 'Two thumbs up', 'I fell asleep halfway through',
               "We can't wait for the sequel!!", '!', '?', 'I cannot recommend this highly enough',
               'instant classic.', 'Steven Seagal was amazing. His performance was Oscar-worthy.']
