@@ -113,38 +113,39 @@ def Transform_documents(texte_doc_list,normalize):
     return documents
 
 X, y = book_train.data, book_train.target
-m_normalize = 1#
-vectorizer = CountVectorizer(min_df=4, stop_words=stopwd)
+m_normalize = 2
 New_X = Transform_documents(X,m_normalize)
 
-X = vectorizer.fit_transform(New_X).toarray()
+for mindf in range(1,50):
+    vectorizer = CountVectorizer(min_df=mindf, stop_words=stopwd)
+    X = vectorizer.fit_transform(New_X).toarray()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
+    clf = MultinomialNB().fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+
+    print("------------------- " + mindf.__str__()+" ------------------------------")
+    print("Naive Bayes")
+    print(sklearn.metrics.accuracy_score(y_test, y_pred))
 
 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
-clf = MultinomialNB().fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-print(sklearn.metrics.accuracy_score(y_test, y_pred))
+
+    average_precision = average_precision_score(y_test, y_pred)
+
+    print('Average precision-recall score: {0:0.2f}'.format(
+          average_precision))
 
 
 
+    print("Logistic Reg")
+    logreg = LogisticRegression().fit(X_train, y_train)
+    y_pred = logreg.predict(X_test)
+    print(sklearn.metrics.accuracy_score(y_test, y_pred))
+    average_precision = average_precision_score(y_test, y_pred)
 
-average_precision = average_precision_score(y_test, y_pred)
-
-print('Average precision-recall score: {0:0.2f}'.format(
-      average_precision))
-
-
-print("-------------------------------------------------")
-print("Logistic Reg")
-logreg = LogisticRegression().fit(X_train, y_train)
-y_pred = logreg.predict(X_test)
-print(sklearn.metrics.accuracy_score(y_test, y_pred))
-average_precision = average_precision_score(y_test, y_pred)
-
-print('Average precision-recall score: {0:0.2f}'.format(
-      average_precision))
-print("-------------------------------------------------")
+    print('Average precision-recall score: {0:0.2f}'.format(
+          average_precision))
+    print("-------------------------------------------------")
 
 
 #reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
