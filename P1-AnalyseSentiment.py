@@ -41,7 +41,7 @@ stopwd  = set(sw.words('english'))
 
 lemmatizer = WordNetLemmatizer()
 
-f = open('analyse avec-stemming.txt','w')
+f = open('A avec-stemming.txt','w')
 stdout_old = sys.stdout
 sys.stdout = f
 
@@ -79,7 +79,7 @@ def Tranforme_texte(texte_st, normalize):
     try:
         document_tok = sent_tokenize(str(texte_st).lower())
     except:
-        texte_st = "This is a goob bad book"
+        texte_st = "This is a good bad book"
         document_tok = sent_tokenize(str(texte_st).lower())
     doc_res = []
     for sent in document_tok:
