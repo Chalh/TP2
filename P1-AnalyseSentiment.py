@@ -25,6 +25,7 @@ from sklearn.model_selection import train_test_split
 from nltk.stem import PorterStemmer
 from sklearn.linear_model import LogisticRegression
 import sys
+from sklearn.metrics import recall_score
 
 ps = PorterStemmer()
 bookdir = r'Book'
@@ -41,7 +42,7 @@ stopwd  = set(sw.words('english'))
 
 lemmatizer = WordNetLemmatizer()
 
-f = open('A avec-stemming.txt','w')
+f = open('A SOUINONavec-stemming1.txt','w')
 stdout_old = sys.stdout
 sys.stdout = f
 
@@ -93,17 +94,17 @@ def Tranforme_texte(texte_st, normalize):
             if token in stopwd:
                 continue
 
-            # Lemmatize the token and yield
+            # Lem#matize the token and yield
             lemma = lemmatize_texte(token, tag,normalize)
             if lemma is None:
                 continue
             set_res.append(lemma[0])
             # Ajout des comptes des poids positif et negatif
-            if (lemma[1].pos_score() > lemma[1].neg_score()):
-                set_res.append("mot_positif")
-            else:
-                if (lemma[1].pos_score() < lemma[1].neg_score()):
-                    set_res.append("mot_negatif")
+#            if (lemma[1].pos_score() > lemma[1].neg_score()):
+#                set_res.append("mot_positif")
+#            else:
+#                if (lemma[1].pos_score() < lemma[1].neg_score()):
+#                    set_res.append("mot_negatif")
         set_res = ' '.join(set_res)
 
         doc_res.append(set_res)
@@ -115,13 +116,19 @@ def Transform_documents(texte_doc_list,normalize):
     for sen in range(0, len(texte_doc_list)):
         documents.append(Tranforme_texte(texte_doc_list[sen],normalize))
     return documents
+def show_most_informative_features(vectorizer, clf, n=20):
+    feature_names = vectorizer.get_feature_names()
+    coefs_with_fns = sorted(zip(clf.coef_[0], feature_names))
+    top = zip(coefs_with_fns[:n], coefs_with_fns[:-(n + 1):-1])
+    for (coef_1, fn_1), (coef_2, fn_2) in top:
+        print ("\t%.4f\t%-15s\t\t%.4f\t%-15s" % (coef_1, fn_1, coef_2, fn_2))
 
 X, y = book_train.data, book_train.target
-m_normalize = 3
+m_normalize = 2
 New_X = Transform_documents(X,m_normalize)
-print("NAIVE BAYES;-----;LOGISTIC REGRESSION;-----")
-print("accuracy;precision;accuracy;precision")
-for mindf in range(1,50):
+print("NAIVE BAYES;-----;-----;LOGISTIC REGRESSION;-----;-----")
+print("accuracy;precision;recall;accuracy;precision;recall")
+for mindf in range(1,51):
     vectorizer = CountVectorizer(min_df=mindf, stop_words=stopwd)
     X = vectorizer.fit_transform(New_X).toarray()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=0)
@@ -130,13 +137,17 @@ for mindf in range(1,50):
 
     average_precision_nb = average_precision_score(y_test, y_pred)
     accuracy_score_nb=sklearn.metrics.accuracy_score(y_test, y_pred)
+    recall_nb = recall_score(y_test, y_pred)
+    #show_most_informative_features(vectorizer,clf)
 
 
     logreg = LogisticRegression().fit(X_train, y_train)
     y_pred = logreg.predict(X_test)
     average_precision_lr = average_precision_score(y_test, y_pred)
+    recall_lg = recall_score(y_test, y_pred)
+
     accuracy_score_lr = sklearn.metrics.accuracy_score(y_test, y_pred)
-    print(accuracy_score_nb.__str__()+";"+average_precision_nb.__str__()+";"+accuracy_score_lr.__str__()+";"+average_precision_lr.__str__())
+    print(accuracy_score_nb.__str__()+";"+average_precision_nb.__str__()+";"+recall_nb.__str__()+";"+accuracy_score_lr.__str__()+";"+average_precision_lr.__str__()+";"+recall_lg.__str__())
 
 
 #reviews_tt = [0,1,0,0,1,1,0,1,1,1,0,1,1]
