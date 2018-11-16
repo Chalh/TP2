@@ -4,7 +4,7 @@
 # AUTEUR: CHIHEB EL OUEKDI
 #  IFT - 7022
 #  TRAVAIL-2
-# DATE:                                                                                                 #
+# DATE: 13 Novembre 2018                                                                                                #
 ########################################################################################################################
 
 import nltk
@@ -17,11 +17,11 @@ import os
 import sys
 ########################################################################################################################
 #                                                                                                                      #
-#               Preparation de la structure de calcul de probabilite avec NLTK
+#               Preparation de la structure de calcul de  avec NLTK
 #                                                                                                                      #
 ########################################################################################################################
 
-
+#Focntion pour générer la liste des attributs d'une phrase
 def Attributs_phrases(phrase,freq_dist,nbgrm):
 
     attribut = {}
@@ -33,7 +33,7 @@ def Attributs_phrases(phrase,freq_dist,nbgrm):
 
     return attribut
 
-
+#Focntion pour générer la liste des attributs d'un fichier
 def Preparer_Attribut_List(chemin_fichier, nb_ligne, langue, ngramme):
 
     file = open(chemin_fichier, 'rb')
@@ -55,7 +55,7 @@ def Preparer_Attribut_List(chemin_fichier, nb_ligne, langue, ngramme):
     return Attributs_list
 
 
-
+#fonction pour prédire la langue d'un fichie de test
 def Reconnaitre_langue(fichier, classificateur,nb_ligne, ngramme):
 
     count_langue = {"en":0,"es":0,"fr":0, "pt":0}
@@ -95,19 +95,27 @@ Chemin_fich_es = 'identification_langue/corpus_entrainement/espanol-training.txt
 Chemin_fich_fr = 'identification_langue/corpus_entrainement/french-training.txt'
 Chemin_fich_pt = 'identification_langue/corpus_entrainement/portuguese-training.txt'
 
-f = open('output_bynight.txt','w')
-stdout_old = sys.stdout
-sys.stdout = f
+#affichage des resltats dans un fichier
+#f = open('output_bynight.txt','w')
+#stdout_old = sys.stdout
+#sys.stdout = f
 
 
 nb_ligne_test=[1,2,3,5,10]
-print("NAIVE BAYES;-----;LOGISTIC REGRESSION;-----")
-print("accuracy;-----;accuracy;-----")
+
+########################################################################################################################
+#                                                                                                                      #
+#         Effectuer les tests sur des N-Gramme variant de 1 a 3 en lisant des n lignes, n varie comme suit [1,2,3,5,10]
+#                                                                                                                      #
+########################################################################################################################
+
 for n in range(1,4):
     N_GRAMMES = n
     for m in nb_ligne_test:
-        NB_LIGNES = m
+        print("------------------------NGRAME:"+n.__str__()+" ::: Nb lignes lues:"+m.__str__()+"-------------------------")
+        print("------------------------------NAIVE BAYES-------------------------------------")
 
+        NB_LIGNES = m
         trainset = Preparer_Attribut_List(Chemin_fich_en,NB_LIGNES,"en",N_GRAMMES) \
                    +  Preparer_Attribut_List(Chemin_fich_es,NB_LIGNES,"es",N_GRAMMES)\
                    +  Preparer_Attribut_List(Chemin_fich_fr,NB_LIGNES,"fr",N_GRAMMES)\
@@ -122,9 +130,8 @@ for n in range(1,4):
 
         Chemin_fich_test = "identification_langue/corpus_test1/"
 
-
+        # Regex pour retrouver la langue du fichie du test â partir du nom de fichier
         p1 = re.compile(r'.*(fr|en|es|pt)\.txt')
-
 
 
         testset=[]
@@ -135,9 +142,8 @@ for n in range(1,4):
 
                 testset += Preparer_Attribut_List(Chemin_fich_test+fabc, NB_LIGNES, m1.group(1), N_GRAMMES)
 
-                #print(fabc + "::" + Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES))
+                #Calcul du nombre de fichierdont la langue est correctement prédite
                 if Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES) == m1.group(1):
-
                     accuracy +=1
 
         print (nltk.classify.util.accuracy(classifier, testset))
@@ -145,6 +151,7 @@ for n in range(1,4):
         print (float(accuracy))
 
         classifier.show_most_informative_features()
+
         print ("------------------------------LOGISTIC REGRESSION-------------------------------------")
 
         testset=[]
@@ -155,9 +162,8 @@ for n in range(1,4):
 
                 testset += Preparer_Attribut_List(Chemin_fich_test+fabc, NB_LIGNES, m1.group(1), N_GRAMMES)
 
-                #print(fabc + "::" + Reconnaitre_langue(Chemin_fich_test + fabc, classifier,NB_LIGNES,N_GRAMMES))
+                # Calcul du nombre de fichierdont la langue est correctement prédite
                 if Reconnaitre_langue(Chemin_fich_test + fabc, lg_classifier,NB_LIGNES,N_GRAMMES) == m1.group(1):
-
                     accuracy +=1
 
         print (nltk.classify.util.accuracy(lg_classifier, testset))
@@ -165,10 +171,7 @@ for n in range(1,4):
         print (float(accuracy))
 
         lg_classifier.show_most_informative_features()
-        print ("-----------------------------------------------hh--------------------------------------")
-
-
-
+        print ("-------------------------------------------------------------------------------------")
 
 sys.stdout = stdout_old
-print ("OK")
+print ("All done")
